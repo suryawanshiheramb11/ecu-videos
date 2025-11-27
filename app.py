@@ -2,6 +2,10 @@ import streamlit as st
 import generator
 import renderer
 import os
+from dotenv import load_dotenv
+import github_storage
+
+load_dotenv()
 
 # Set page title and layout
 st.set_page_config(page_title="OnlyStudies - AI Math Visualizer", layout="wide")
@@ -48,21 +52,21 @@ def set_ui_theme(theme_name):
     if target_is_dark:
         # NOTE: Updated backgroundColor to #030616 (RGB: 3, 6, 22)
         new_theme = """[theme]
-base = "dark"
-primaryColor = "#4F46E5"
-backgroundColor = "#030616"
-secondaryBackgroundColor = "#0F172A"
-textColor = "#F8FAFC"
-"""
+                    base = "dark"
+                    primaryColor = "#4F46E5"
+                    backgroundColor = "#030616"
+                    secondaryBackgroundColor = "#0F172A"
+                    textColor = "#F8FAFC"
+                    """
     else:
         # OnlyStudies Light Theme (White/Slate-50 + Indigo-600)
         new_theme = """[theme]
-base = "light"
-primaryColor = "#4F46E5"
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F8FAFC"
-textColor = "#0F172A"
-"""
+                    base = "light"
+                    primaryColor = "#4F46E5"
+                    backgroundColor = "#FFFFFF"
+                    secondaryBackgroundColor = "#F8FAFC"
+                    textColor = "#0F172A"
+                    """
     
     with open(config_path, "w") as f:
         f.write(new_theme)
@@ -222,7 +226,19 @@ if generate_btn and prompt:
             video_path, error_message = renderer.render_video(fixed_code, quality)
 
     if video_path:
-        st.session_state.video_path = video_path
+        # Upload to GitHub
+        try:
+            with st.spinner("Uploading to GitHub..."):
+                repo_name = os.getenv("GITHUB_REPO")
+                if not repo_name:
+                    st.error("GITHUB_REPO not set in .env")
+                else:
+                    github_url = github_storage.upload_video(video_path, repo_name)
+                    st.session_state.video_path = github_url
+        except Exception as e:
+            st.error(f"Failed to upload to GitHub: {e}")
+            # Fallback to local path if upload fails (though Render won't persist it)
+            st.session_state.video_path = video_path
     else:
         st.error(f"Video rendering failed after retry. Error: {error_message}")
         st.session_state.video_path = None
@@ -275,10 +291,23 @@ if st.session_state.get('video_path') and (st.button("🔄 Regenerate Video", ke
                  video_path, error_message = renderer.render_video(fixed_code, quality_for_regen)
             
             if video_path:
-                st.session_state.video_path = video_path
+                # Upload to GitHub
+                try:
+                    with st.spinner("Uploading to GitHub..."):
+                        repo_name = os.getenv("GITHUB_REPO")
+                        if not repo_name:
+                            st.error("GITHUB_REPO not set in .env")
+                        else:
+                            github_url = github_storage.upload_video(video_path, repo_name)
+                            st.session_state.video_path = github_url
+                except Exception as e:
+                    st.error(f"Failed to upload to GitHub: {e}")
+                    st.session_state.video_path = video_path
+
                 st.session_state.feedback_instruction = None # Reset feedback after use
                 st.rerun() 
             else:
                 st.error(f"Regeneration failed: {error_message}")
     else:
         st.warning("No previous prompt found to regenerate. Please generate an animation first.")
+
