@@ -1,0 +1,6 @@
+__pycache__/
+media/
+.env
+generated_scene.py
+output_video.mp4
+.DS_Store
