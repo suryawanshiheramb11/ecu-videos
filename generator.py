@@ -94,7 +94,8 @@ def generate_manim_code(prompt, subject_mode, feedback_instruction=None, video_t
         "For `RightAngle`, use `RightAngle(line1, line2, length=0.2)`. \n"
         "   - **CRITICAL**: `line1` and `line2` MUST be `Line` Mobjects. Do NOT pass coordinates (numpy arrays) or points.\n"
         "   - If using a `Polygon`, do NOT try to access `.lines`. Instead, create separate `Line` objects for the sides you need.\n"
-        "   - **Vector Safety**: ALL vectors for `shift`, `move_to`, `next_to` MUST be 3D (e.g., `[1, 2, 0]` or `RIGHT * 2`). NEVER use 2D vectors like `[1, 2]`.\n\n"
+        "   - **Vector Safety**: ALL vectors for `shift`, `move_to`, `next_to` MUST be 3D (e.g., `[1, 2, 0]` or `RIGHT * 2`). NEVER use 2D vectors like `[1, 2]`.\n"
+        "   - **Camera**: Do NOT access `self.camera.frame`. Do NOT try to move the camera frame. Keep the camera static.\n\n"
         
         "CRITICAL REQUIREMENTS FOR HIGH QUALITY:\n"
         f"1. **Voiceover**: You MUST use `manim_voiceover`. Import `VoiceoverScene` from `manim_voiceover` and `GTTSService` from `manim_voiceover.services.gtts`. Inherit from `VoiceoverScene` instead of `Scene`. Initialize `self.set_speech_service(GTTSService(lang='en', tld='{tld}'))` in `construct`. Wrap animations in `with self.voiceover(text='...') as tracker:` blocks. Ensure `run_time` of animations inside the block is either omitted (to match audio) or set to `tracker.duration`.\n"
@@ -150,7 +151,8 @@ def fix_manim_code(code, error_message):
         f"ERROR:\n{error_message}\n\n"
         "Please fix the code to resolve the error. "
         "Output ONLY the fixed, valid, runnable Python code. "
-        "Do NOT use Markdown backticks."
+        "Do NOT use Markdown backticks.\n"
+        "IMPORTANT: Do NOT access `self.camera.frame`. The camera is static."
     )
     
     try:
