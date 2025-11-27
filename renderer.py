@@ -43,17 +43,15 @@ def render_video(code_string, quality="Low"):
         output_path = os.path.join("media", "videos", "generated_scene", folder_name, "output_video.mp4")
         
         if os.path.exists(output_path):
-            return output_path
+            return output_path, None
         else:
             # Fallback: search for the file if it's not in the expected path
             for root, dirs, files in os.walk("media"):
                 if "output_video.mp4" in files:
-                    return os.path.join(root, "output_video.mp4")
-            return None
+                    return os.path.join(root, "output_video.mp4"), None
+            return None, "Video file not found after rendering."
 
     except subprocess.CalledProcessError as e:
-        print(f"Manim Error: {e.stderr}")
-        return None
+        return None, f"Manim Error: {e.stderr}"
     except Exception as e:
-        print(f"Unexpected Error: {e}")
-        return None
+        return None, f"Unexpected Error: {e}"

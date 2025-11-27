@@ -3,3 +3,4 @@ google-generativeai
 streamlit
 python-dotenv
 watchdog
+manim-voiceover[gtts]
